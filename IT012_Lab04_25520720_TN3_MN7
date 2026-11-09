@@ -1,0 +1,121 @@
+.data
+m1:      .asciiz "Thang "
+m2:      .asciiz ": "
+mt:      .asciiz "Tong: "
+mm:      .asciiz "Thang cao nhat: "
+lp:      .asciiz " ("
+rp:      .asciiz ")"
+nl:      .asciiz "\n"
+reading: .word 1000, 1095, 1205, 1345, 1510, 1715, 1955
+         .word 2210, 2440, 2625, 2775, 2895, 2995
+usage:   .space 48
+
+# Ma nguon 8 – dien nang tung thang (Hoan chinh)
+.text
+.globl main
+main:
+  la   $s0, reading     # $s0 = dia chi nen reading
+  la   $s1, usage       # $s1 = dia chi nen usage
+  addi $s2, $zero, 0    # i = 0
+  addi $s3, $zero, 12   # n = 12 thang
+  
+  li   $s4, 0           # tong dien nang = 0
+  li   $s5, 0           # gia tri max = 0
+  li   $s6, 1           # thang max = 1
+
+Loop:
+  beq  $s2, $s3, Done   # Thoat neu i == n
+  
+  # Tinh dia chi reading[i] va doc reading[i], reading[i+1]
+  sll  $t1, $s2, 2      # $t1 = 4 * i
+  add  $t2, $s0, $t1    # $t2 = dia chi reading[i]
+  lw   $t3, 0($t2)      # $t3 = reading[i]
+  lw   $t4, 4($t2)      # $t4 = reading[i+1]
+  
+  # Tinh dien nang thang i+1: $t5 = reading[i+1] - reading[i]
+  sub  $t5, $t4, $t3
+  
+  # Tinh dia chi usage[i] va luu $t5 vao usage[i]
+  add  $t6, $s1, $t1    # $t6 = dia chi usage[i]
+  sw   $t5, 0($t6)      # usage[i] = $t5
+  
+  # Cong don tong: $s4 = $s4 + $t5
+  add  $s4, $s4, $t5
+  
+  # Tim max: if ($t5 > $s5) { $s5 = $t5; $s6 = i + 1; }
+  ble  $t5, $s5, not_max
+  move $s5, $t5         # Cap nhat gia tri max
+  addi $s6, $s2, 1      # Cap nhat thang max (i + 1)
+not_max:
+
+  # In chuoi "Thang "
+  li   $v0, 4
+  la   $a0, m1
+  syscall
+  
+  # In so thu tu thang (i + 1)
+  li   $v0, 1
+  addi $a0, $s2, 1
+  syscall
+  
+  li   $v0, 4
+  la   $a0, m2
+  syscall
+  
+  # In gia tri dien nang ($t5)
+  li   $v0, 1
+  add  $a0, $t5, $zero
+  syscall
+  
+  li   $v0, 4
+  la   $a0, nl
+  syscall
+  
+  # i = i + 1, quay lai Loop
+  addi $s2, $s2, 1
+  j    Loop
+
+Done:
+  # In "Tong: "
+  li   $v0, 4
+  la   $a0, mt
+  syscall
+  
+  # In gia tri tong ($s4)
+  li   $v0, 1
+  move $a0, $s4
+  syscall
+  
+  li   $v0, 4
+  la   $a0, nl
+  syscall
+
+  # In "Thang cao nhat: "
+  li   $v0, 4
+  la   $a0, mm
+  syscall
+  
+  # In so thang ($s6)
+  li   $v0, 1
+  move $a0, $s6
+  syscall
+  
+  li   $v0, 4
+  la   $a0, lp
+  syscall
+  
+  # In gia tri max ($s5)
+  li   $v0, 1
+  move $a0, $s5
+  syscall
+  
+  li   $v0, 4
+  la   $a0, rp
+  syscall
+  
+  li   $v0, 4
+  la   $a0, nl
+  syscall
+
+  li   $v0, 10
+  syscall

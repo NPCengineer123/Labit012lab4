@@ -1,0 +1,59 @@
+.data
+prompt: .asciiz "Nhap dien nang (kWh): "
+msg:    .asciiz "Bac: "
+nl:     .asciiz "\n"
+ 
+.text
+.globl main
+main:
+  li  $v0, 4
+  la  $a0, prompt
+  syscall
+  
+  li  $v0, 5               # ??c kWh, k?t qu? ? $v0
+  syscall
+  add $s0, $v0, $zero      # $s0 = dien nang (kWh)
+  
+  # Xác ??nh b?c (1..4) ??t vào $s1 d?a trên B?ng 6
+  li  $t0, 100             # Ng??ng b?c 1 
+  ble $s0, $t0, bac_1      
+  
+  li  $t0, 150             # Ng??ng b?c 2 
+  ble $s0, $t0, bac_2      
+  
+  li  $t0, 200             # Ng??ng b?c 3 
+  ble $s0, $t0, bac_3      
+  
+  li  $s1, 4               # B?c 4
+  j   print_result
+
+bac_1:
+  li  $s1, 1
+  j   print_result
+
+bac_2:
+  li  $s1, 2
+  j   print_result
+
+bac_3:
+  li  $s1, 3
+
+print_result:
+  # In chu?i "Bac: "
+  li  $v0, 4
+  la  $a0, msg
+  syscall
+  
+  # In giá tr? s? b?c ($s1)
+  li  $v0, 1
+  add $a0, $s1, $zero
+  syscall
+  
+  # In xu?ng dòng
+  li  $v0, 4
+  la  $a0, nl
+  syscall
+
+  # Thoát ch??ng trình
+  li  $v0, 10
+  syscall
